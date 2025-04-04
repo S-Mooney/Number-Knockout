@@ -1,0 +1,92 @@
+import discord
+import random
+from discord.ext import commands
+
+# Replace 'YOUR_BOT_TOKEN' with your actual bot token
+TOKEN = MTM1NzUzMzc3MDkwNzEyODAwOA.G7xl08.XW2_mpxZywS3CcC4W0qn0zw7E3aA6kT2Yol3uc
+
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+game_active = False
+players = {}
+winning_number = None
+
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user.name}')
+
+@bot.command(name='join', help='Enter the number guessing game. Choose a number between 1 and 100.')
+async def join_game(ctx, choice: int):
+    global game_active, players
+
+    if not game_active:
+        await ctx.send("The game hasn't started yet! Use the `!startgame` command to begin.")
+        return
+
+    if ctx.author.id in players:
+        await ctx.send("You have already joined the game!")
+        return
+
+    if 1 <= choice <= 100:
+        players[ctx.author.id] = choice
+        await ctx.send(f"{ctx.author.name} has joined the game and chosen the number {choice}.")
+    else:
+        await ctx.send("Please choose a number between 1 and 100.")
+
+@bot.command(name='startgame', help='Starts the number guessing game.')
+async def start_game_command(ctx):
+    global game_active, players, winning_number
+
+    if game_active:
+        await ctx.send("The game is already active! Use `!guess` to see the results.")
+        return
+
+    if not players:
+        await ctx.send("No players have joined yet. Use the `!join <number>` command to enter.")
+        return
+
+    game_active = True
+    winning_number = random.randint(1, 100)
+    await ctx.send("The game has started! Players have made their choices. Use `!guess` to reveal the winner.")
+
+@bot.command(name='guess', help='Reveals the winning number and the winner(s).')
+async def guess_command(ctx):
+    global game_active, players, winning_number
+
+    if not game_active:
+        await ctx.send("The game hasn't started yet. Use `!startgame` to begin.")
+        return
+
+    if winning_number is None:
+        await ctx.send("Something went wrong. The winning number hasn't been generated.")
+        return
+
+    await ctx.send(f"The winning number is: **{winning_number}**!")
+
+    winners = []
+    for user_id, chosen_number in players.items():
+        if chosen_number == winning_number:
+            winner = await bot.fetch_user(user_id)
+            winners.append(winner.name)
+
+    if winners:
+        winner_names = ", ".join(winners)
+        await ctx.send(f"Congratulations to the winner(s): **{winner_names}**!")
+    else:
+        await ctx.send("No one guessed the winning number this time. Better luck next time!")
+
+    # Reset the game for the next round
+    game_active = False
+    players = {}
+    winning_number = None
+
+@bot.command(name='resetgame', help='Resets the game, clearing all players and stopping any active game.')
+async def reset_game_command(ctx):
+    global game_active, players, winning_number
+    game_active = False
+    players = {}
+    winning_number = None
+    await ctx.send("The game has been reset.")
+
+bot.run(TOKEN)
