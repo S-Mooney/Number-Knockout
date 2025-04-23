@@ -3,7 +3,7 @@ import random
 from discord.ext import commands
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = MTM1NzUzMzc3MDkwNzEyODAwOA.G7xl08.XW2_mpxZywS3CcC4W0qn0zw7E3aA6kT2Yol3uc
+TOKEN = 'MTM1NzUzMzc3MDkwNzEyODAwOA.G7xl08.XW2_mpxZywS3CcC4W0qn0zw7E3aA6kT2Yol3uc'
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix='!', intents=intents)
